@@ -92,7 +92,7 @@ steps:
 
   commit_app:
     title: Commiting new App Version
-    type: git-commit
+    type: cf-support/git-commit
     stage: Deploy
     arguments:
       repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
