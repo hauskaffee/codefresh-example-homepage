@@ -1,0 +1,12 @@
+config:
+  - category: Codefresh Support
+    services:
+      - name: Support Portal
+        uri: https://support.codefresh.io
+        description: Codefresh Support Portal
+        icon: zendesk
+      - name: Support KB Articles
+        uri: https://codefresh.io/docs/docs/kb/common-issues/
+        description: KB articles for common issues and more
+        icon: mdi-progress-wrench
+        iconColor: teal-400

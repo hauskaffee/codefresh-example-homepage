@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: example-homepage-app
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io/foreground
+spec:
+  project: default
+  source:
+    path: helm
+    repoURL: https://github.com/codefresh-support/example-homepage
+    targetRevision: main
+    helm:
+      parameters:
+        - name: image.tag
+          value: 115d675
+        - name: env.title
+          value: Codefresh Support Links
+      values: |
+        config:
+          - category: Codefresh Support
+            services:
+              - name: Support Portal
+                uri: https://support.codefresh.io
+                description: Codefresh Support Portal
+                icon: zendesk
+              - name: Support KB Articles
+                uri: https://codefresh.io/docs/docs/kb/common-issues/
+                description: KB articles for common issues and more
+                icon: mdi-progress-wrench
+                iconColor: teal-400
+  destination:
+    name: in-cluster
+    namespace: example-homepage
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - PrunePropagationPolicy=foreground
+      - Replace=true
+      - PruneLast=false
+      - Validate=true
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=false
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=false

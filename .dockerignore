@@ -1,0 +1,9 @@
+.vscode
+.DS_Store
+node_modules
+dist
+dist-ssr
+docker-compose.yml
+cd
+ci
+helm

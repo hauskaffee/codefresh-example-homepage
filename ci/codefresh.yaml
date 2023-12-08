@@ -1,0 +1,113 @@
+version: "1.0"
+
+stages:
+  - Clone
+  - Prepare & Validation
+  - Build & Push
+  - Deploy
+
+steps:
+  main_clone:
+    title: Cloning repo
+    type: git-clone
+    stage: Clone
+    arguments:
+      repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
+      git: hauskaffee
+      revision: ${{CF_BRANCH}}
+
+  test_prep:
+    title: Preparing tests
+    type: freestyle
+    stage: Prepare & Validation
+    arguments:
+      image: node:21.4.0-alpine3.18
+      commands:
+        - wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
+        - npm install
+        - yq '.config' -o json config.yaml > src/config.json
+
+  testing_app:
+    title: Testing Application
+    type: freestyle
+    stage: Prepare & Validation
+    arguments:
+      image: curlimages/curl:8.5.0
+      commands:
+        - sleep 30
+        - curl website:4173
+    services:
+      composition:
+        website:
+          image: node:21.4.0-alpine3.18
+          ports:
+            - 4173
+          volumes:
+            - ${{CF_VOLUME_NAME}}:${{CF_VOLUME_PATH}}
+          working_dir: ${{CF_VOLUME_PATH}}/${{CF_REPO_NAME}}
+          command: npm run start
+
+  test_cleanup:
+    title: Cleaning up tests
+    type: freestyle
+    stage: Prepare & Validation
+    arguments:
+      image: node:21.4.0-alpine3.18
+      commands:
+        - rm -rf node_modules src/config.json
+
+  build_app:
+    title: Building Starbase 80 image
+    type: build
+    stage: Build & Push
+    arguments:
+      image_name: cfsupport/${{CF_REPO_NAME}}
+      tag: ${{CF_SHORT_REVISION}}
+      registry: cf-support
+      dockerfile: Dockerfile
+      disable_push: true
+
+  push_app:
+    title: Pushing Starbase 80 image
+    type: push
+    stage: Build & Push
+    arguments:
+      candidate: ${{build_app}}
+      image_name: cfsupport/${{CF_REPO_NAME}}
+      registry: cf-support
+      tags:
+        - latest
+        - ${{CF_SHORT_REVISION}}
+
+  modify_app:
+    title: Updating Image Version
+    type: freestyle
+    stage: Deploy
+    arguments:
+      image: mikefarah/yq:4
+      commands:
+        - yq -i e '.spec.source.helm.parameters[0].value = "${{CF_SHORT_REVISION}}"' cd/example-homepage-app.yaml
+        - yq -i e '.spec.source.helm.values = load_str("config.yaml")' cd/example-homepage-app.yaml
+        - cat cd/example-homepage-app.yaml
+
+  commit_app:
+    title: Commiting new App Version
+    type: git-commit
+    stage: Deploy
+    arguments:
+      repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
+      git: hauskaffee
+      commit_message: Updating App Image Version to ${{CF_SHORT_REVISION}}
+      git_user_email: support@codefresh.io
+      git_user_name: codefresh-support
+      allow_empty: false
+      add:
+        - ./cd/example-homepage-app.yaml
+
+hooks:
+  on_fail:
+    exec:
+      image: curlimages/curl:8.5.0
+      commands:
+        - |
+          curl ${{SLACK_WEBHOOK_URL}} --data "{ 'BUILD_URL': '${{CF_BUILD_URL}}' }"

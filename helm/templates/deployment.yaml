@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-homepage
+  labels:
+    app: example-homepage
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: example-homepage
+  template:
+    metadata:
+      labels:
+        app: example-homepage
+    spec:
+      containers:
+        - name: nginx
+          image: cfsupport/example-homepage:{{ .Values.image.tag}}
+          ports:
+            - containerPort: 4173
+              protocol: TCP
+          env:
+            - name: TITLE
+              value: {{ .Values.env.title }}
+            - name: LOGO
+              value: {{ .Values.env.logo }}
+            - name: HEADER
+              value: "{{ .Values.env.header }}"
+            - name: HEADERLINE
+              value: "{{ .Values.env.headerline }}"
+            - name: HEADERTOP
+              value: "{{ .Values.env.headertop }}"
+            - name: CATEGORIES
+              value: {{ .Values.env.categories }}
+            - name: BGCOLOR
+              value: {{ .Values.env.bgcolor }}
+            - name: BGCOLORDARK
+              value: {{ .Values.env.bgcolordark }}
+            - name: NEWWINDOW
+              value: "{{ .Values.env.newwindow }}"
+          
+          volumeMounts:
+            - name: json-config
+              mountPath: /app/src/config.json
+              subPath: config.json
+      volumes:
+        - name: json-config
+          configMap:
+            name: example-homepage
+            

@@ -1,0 +1,17 @@
+replicaCount: 2
+
+image:
+  tag: latest
+
+env:
+  title: Example Links
+  logo: /logo.png
+  header: "true"
+  headerline: "true"
+  headertop: "false"
+  categories: small
+  bgcolor: "#fff"
+  bgcolordark: "#000"
+  newwindow: "true"
+
+config: # array of configs for app

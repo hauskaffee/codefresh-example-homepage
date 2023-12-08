@@ -1,0 +1,30 @@
+{
+	"name": "starbase-80",
+	"displayName": "Starbase 80",
+	"homepage": "https://github.com/notclickable-jordan/starbase-80",
+	"repository": {
+		"url": "https://github.com/notclickable-jordan/starbase-80"
+	},
+	"version": "1.1.6",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"start": "npm run build && vite preview"
+	},
+	"dependencies": {
+		"@types/react-dom": "^18.2.7",
+		"@types/react-helmet": "^6.1.6",
+		"@types/react": "^18.2.15",
+		"@vitejs/plugin-react": "^4.0.3",
+		"autoprefixer": "^10.4.14",
+		"js-yaml": "^4.1.0",
+		"postcss": "^8.4.26",
+		"react-dom": "^18.2.0",
+		"react-helmet": "^6.1.0",
+		"react": "^18.2.0",
+		"tailwindcss": "^3.3.3",
+		"typescript": "^5.1.6",
+		"vite": "^5.0.6"
+	}
+}
