@@ -13,7 +13,7 @@ spec:
     helm:
       parameters:
         - name: image.tag
-          value: af3aa37
+          value: cb12da3
         - name: env.title
           value: Codefresh Support Links
       values: |
